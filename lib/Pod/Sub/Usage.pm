@@ -12,7 +12,7 @@ our %EXPORT_TAGS = ( all => [@EXPORT_OK], );
 
 =head1 NAME
 
-Pod::Sub::Usage - The great new Pod::Sub::Usage!
+Pod::Sub::Usage - Module to print sub documentaion from pod!
 
 =head1 VERSION
 
