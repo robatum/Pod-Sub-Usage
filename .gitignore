@@ -1,0 +1,7 @@
+Pod-Sub-Usage-*
+MYMETA.json
+MYMETA.yml
+Makefile
+blib/
+pm_to_blib
+cover_db/
