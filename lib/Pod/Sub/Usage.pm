@@ -7,7 +7,7 @@ use warnings;
 $Pod::Sub::Usage::VERSION = '0.010000';
 
 use Exporter 'import';
-our @EXPORT_OK = qw( sub2usage );
+our @EXPORT_OK = qw( sub2usage pod_text);
 our %EXPORT_TAGS = ( all => [@EXPORT_OK], );
 
 =head1 NAME
@@ -45,7 +45,7 @@ Nothing is exported by default. You can ask for specific subroutines (described 
 
 =head2 sub2usage
 
-Reads file from package and print out the header from the sub you want.
+Print out the header information by given sub.
 
 =cut
 
@@ -53,10 +53,23 @@ sub sub2usage {
     my ( $sub, $package ) = @_;
     die q~You have to say the sub if you want to know something about it!~ if !$sub;
     require Module::Locate;
-    my $file = Module::Locate::locate( $package ||= ( caller(0) )[0] );
+    my $file = Module::Locate::locate( $package ||= ( caller(0) )[0] ) // ( caller(0) )[1];
+    my $string = pod_text( $file, $package, $sub );
+    print $string;
+}
+
+=head2 pod_text
+
+Returns the string from pod
+
+=cut
+
+sub pod_text {
+    my ( $file, $package, $sub ) = @_;
     open( my $fh, '<:encoding(UTF-8)', $file ) or die "Could not open file '$file' $!";
     my $rex_start_head = qr/^=head\d ($sub|$package::$sub)/;
     my $found          = 0;
+    my $sub_header     = '';
     while ( my $row = <$fh> ) {
         last if ( $row =~ /^=cut/ && $found );
         if ( $row =~ /$rex_start_head/ ) {
@@ -66,10 +79,11 @@ sub sub2usage {
         if ($found) {
             chomp $row;
             $row =~ s/^=head\d\s+//;
-            print "$row\n";
+            $sub_header .= "$row\n";
         }
     }
     die qq~Couldn't find $sub in file $file. $!~ if !$found;
+    return $sub_header;
 }
 
 =head1 AUTHOR
@@ -81,7 +95,6 @@ Mario Zieschang, C<< <mziescha at cpan.org> >>
 Please report any bugs or feature requests to C<bug-pod-sub-usage at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Pod-Sub-Usage>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
 
 
 
@@ -114,8 +127,9 @@ L<http://search.cpan.org/dist/Pod-Sub-Usage/>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
+=head1 SEE ALSO
+ 
+This package was partly inspired by on L<Pod::Usage> by Marek Rouchal.
 
 
 =head1 LICENSE AND COPYRIGHT
